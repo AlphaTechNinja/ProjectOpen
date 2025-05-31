@@ -1,0 +1,33 @@
+local kernel = ...
+local event = kernel.event
+local knownComponents = {}
+
+-- Initialize known components
+for addr, type in component.list() do
+    knownComponents[addr] = type
+end
+-- Create a poller coroutine
+local function componentWatcher()
+        -- Detect added components
+        local current = {}
+        for addr, type in component.list() do
+            current[addr] = type
+            if not knownComponents[addr] then
+                knownComponents[addr] = type
+                event.push("component_added", addr, type)
+            end
+        end
+
+        -- Detect removed components
+        for addr, type in pairs(knownComponents) do
+            if not current[addr] then
+                knownComponents[addr] = nil
+                event.push("component_removed", addr, type)
+            end
+        end
+
+        coroutine.yield() -- yield to the poller system
+end
+
+kernel.componentPoller = componentWatcher
+kernel.poller.register(kernel.componentPoller,"componentWatcher")
