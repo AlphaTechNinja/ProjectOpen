@@ -27,13 +27,11 @@ local function flip(x, y)
     gpu.setForeground(oldfg)
 end
 function term.__updateBlink()
-
-    -- Unflip previous if it was different
+    --unflip previous if it was different
     --if term.__lastblinkpos.x ~= term.cursor.x or term.__lastblinkpos.y ~= term.cursor.y and term.__blinkstate then
     --    flip(term.__lastblinkpos.x, term.__lastblinkpos.y)
     --end
-
-    -- Flip current
+    --flip current
     if term.__blinkEnabled or term.__blinkstate then
         local x,y = term.cursor.x,term.cursor.y
         if term.__readstart then
@@ -41,7 +39,7 @@ function term.__updateBlink()
         end
         flip(term.cursor.x, term.cursor.y)
     end
-    -- Update last position
+    --update last position
     --term.__lastblinkpos = { x = term.cursor.x, y = term.cursor.y }
     term.__blinkstate = not term.__blinkstate
     if not term.__blinkEnabled then
@@ -91,7 +89,7 @@ function term.write(text)
         if byte == 10 then -- \n
             term.newline()
         elseif byte == 13 then
-            -- Ignore \r (optional: handle \r\n combo by skipping next char)
+            --ignore \r (optional: handle \r\n combo by skipping next char)
         else
             gpu.set(term.cursor.x, term.cursor.y, ch)
             term.cursor.x = term.cursor.x + 1

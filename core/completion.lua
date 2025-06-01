@@ -98,6 +98,5 @@ function completion.decodeCompletion(input,completionOptions,shell)
         if not varMatch then
             return {} -- no completeions
         end
-        
     end
 end
