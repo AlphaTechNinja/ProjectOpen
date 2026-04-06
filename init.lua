@@ -73,7 +73,16 @@ function errorf(message, ...)
     end
     error(string.format(message, table.unpack(args)), level + 1)
 end
-
+-- global inject for user system
+local currentuser = {name="kernel",level=math.huge}
+useraccess = {
+    setuser = function (new)
+        currentuser = new
+    end,
+    getuser = function ()
+        return currentuser
+    end
+}
 -- the concept of this OS is to provide higher abstractions
 -- so drives exists drivers will be loaded first
 -- but we need package's skeleton
@@ -92,7 +101,7 @@ kernel.io = require("io")
 -- debug
 kernel.term = require("term")
 kernel.terminal = require("terminal")
-kernel.shell = require("simpleshell")
+kernel.shell = require("luashell")--require("advanceshell").shell
 kernel.os = require("os")
 kernel.package.delay(kernel.os,"/full/os.lua")
 --kernel.terminal.blinkDisabled()

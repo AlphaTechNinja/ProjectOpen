@@ -4,6 +4,7 @@
 checkArg = checkArg
 local kernal = ...
 local classes = kernal.classes
+---@class fs
 local fs = {}
 local mounts = {
     ["/"] = computer.getBootAddress()
@@ -17,6 +18,9 @@ local function toProxy(unkown)
         return component.proxy(unkown)
     end
 end
+
+---@param path string
+---@return string[]
 function fs.splitPath(path)
     -- simply splits by /
     local tokens = {}
@@ -25,10 +29,17 @@ function fs.splitPath(path)
     end
     return tokens
 end
+
+---@param path string
+---@return string
+---@return string
 function fs.splitFilename(path)
     local name, ext = string.match(path, "(.+)%.(.+)")
     return name, ext
 end
+
+---@param path string
+---@return string
 function fs.simplify(path)
     local basepath = fs.splitPath(path)
     local simplified = {}
@@ -41,10 +52,17 @@ function fs.simplify(path)
     end
     return "/"..table.concat(simplified,"/")
 end
+
+---@param ... string
+---@return string
 function fs.combine(...)
     return fs.simplify(table.concat(({...}),"/"))
 end
 -- main logic
+
+---@param path string
+---@return string
+---@return table|unknown
 function fs.resolve(path)
     path = fs.simplify(path)
     local fullpath = "/"
@@ -65,26 +83,45 @@ function fs.resolve(path)
     return localpath, toProxy(filesystem)
 end
 -- global functions
+
+---@param path string
+---@return boolean
 function fs.exists(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.exists(localpath)
 end
+
+---@param path string
+---@return boolean
 function fs.isReadOnly(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.isReadOnly()
 end
+
+---@param path string
+---@return unknown
 function fs.makeDirectory(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.makeDirectory(localpath)
 end
+
+---@param path string
+---@return boolean
 function fs.isDirectory(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.isDirectory(localpath)
 end
+
+---@param path string
+---@return string[]
 function fs.list(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.list(localpath)
 end
+
+---@param source string
+---@param dest string
+---@return boolean
 function fs.rename(source,dest)
     local slocalpath, sfilesystem = fs.resolve(source)
     local dlocalpath, dfilesystem = fs.resolve(dest)
@@ -99,6 +136,9 @@ function fs.rename(source,dest)
     writehandle:close()
     return true
 end
+
+---@param path string
+---@param filesystem any
 function fs.mount(path,filesystem)
     checkArg(2,filesystem,{"table","string"})
     if mounts[path] then
@@ -106,6 +146,8 @@ function fs.mount(path,filesystem)
     end
     mounts[path] = filesystem
 end
+
+---@param path string
 function fs.unmount(path)
     checkArg(1,path,"string")
     -- first check if it is an path
@@ -128,8 +170,16 @@ function fs.unmount(path)
     return unmounted
 end
 -- files
+---@class file
+---@field new fun(self : self, path : string, mode : "r"|"w") : file
+---@field __fs any
+---@field __handle integer
 local file = classes.create("FileHandle")
 fs.file = file
+
+---@param path string
+---@param mode "r"|"w"
+---@return table?
 function file:constructor(path,mode)
     mode = mode or "r"
     if mode == "r" then
@@ -160,23 +210,38 @@ function file:close()
     self.__fs.close(self.__handle)
     self.__close = true
 end
+
+---@param len integer
+---@return string
 function file:read(len)
     len = len or 1
     if self.__close then error("Attempted to read a closed handle",2) end
     return self.__fs.read(self.__handle,len)
 end
+
+---@param data string
+---@return unknown
 function file:write(data)
     checkArg(1,data,"string")
     if self.__close then error("Attempted to read a closed handle",2) end
     return self.__fs.write(self.__handle,data)
 end
+
+---@param whence "start"|"relative"|"end"
+---@param offset integer
+---@return integer
 function file:seek(whence,offset)
     if self.__close then error("Attempted to seek a closed handle",2) end
     return self.__fs.seek(whence,offset)
 end
+
+---@return boolean
 function file:isClosed()
     return self.__close
 end
+
+---@param noclose boolean?
+---@return string
 function file:readAll(noclose)
     local buffer = {}
     while true do
@@ -190,6 +255,9 @@ function file:readAll(noclose)
     return table.concat(buffer,"")
 end
 -- add here
+---@param path string
+---@param mode "r"|"w"
+---@return file
 function fs.open(path,mode)
     return file:new(path,mode)
 end

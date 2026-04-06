@@ -1,0 +1,85 @@
+Date : 2025-12-10 22:04:01
+Directory : c:\Users\kllnm\OneDrive\Desktop\ProjectOpen
+Total : 51 files,  6285 codes, 1204 comments, 581 blanks, all 8070 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Lua      |         51 |      6,285 |      1,204 |        581 |      8,070 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                      |         51 |      6,285 |      1,204 |        581 |      8,070 |
+| . (Files)                                                              |          4 |        424 |         45 |         13 |        482 |
+| bin                                                                    |         22 |        361 |         28 |         18 |        407 |
+| bin (Files)                                                            |         10 |        196 |         22 |         18 |        236 |
+| bin\.data                                                              |          1 |          7 |          2 |          0 |          9 |
+| bin\.info                                                              |         11 |        158 |          4 |          0 |        162 |
+| core                                                                   |          9 |      1,078 |        118 |         71 |      1,267 |
+| full                                                                   |          1 |          6 |          1 |          1 |          8 |
+| libs                                                                   |          2 |         81 |          5 |          2 |         88 |
+| modules                                                                |          9 |      3,885 |        980 |        466 |      5,331 |
+| objects                                                                |          4 |        450 |         27 |         10 |        487 |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                               | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.data\motd.lua         | Lua      |          7 |          2 |          0 |          9 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\cat.lua          | Lua      |         16 |          3 |          0 |         19 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\cd.lua           | Lua      |         17 |          0 |          0 |         17 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\clear.lua        | Lua      |         11 |          0 |          0 |         11 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\debug.lua        | Lua      |         12 |          1 |          0 |         13 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\echo.lua         | Lua      |         12 |          0 |          0 |         12 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\help.lua         | Lua      |         17 |          0 |          0 |         17 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\ls.lua           | Lua      |         18 |          0 |          0 |         18 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\lua.lua          | Lua      |         14 |          0 |          0 |         14 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\motd.lua         | Lua      |         19 |          0 |          0 |         19 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\shutdown.lua     | Lua      |         16 |          0 |          0 |         16 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\template.lua     | Lua      |          6 |          0 |          0 |          6 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\cat.lua                | Lua      |         17 |          0 |          7 |         24 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\cd.lua                 | Lua      |         15 |          0 |          1 |         16 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\clear.lua              | Lua      |          3 |          0 |          0 |          3 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\debug.lua              | Lua      |         19 |          2 |          3 |         24 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\echo.lua               | Lua      |          3 |          0 |          0 |          3 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\help.lua               | Lua      |         32 |          9 |          0 |         41 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\ls.lua                 | Lua      |         12 |          2 |          1 |         15 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\lua.lua                | Lua      |         43 |          3 |          6 |         52 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\motd.lua               | Lua      |         38 |          5 |          0 |         43 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\shutdown.lua           | Lua      |         14 |          1 |          0 |         15 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\classes.lua                | Lua      |         74 |          5 |          0 |         79 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\advanceshell.lua      | Lua      |        352 |         57 |         43 |        452 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\completion.lua        | Lua      |         88 |          5 |         10 |        103 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\event.lua             | Lua      |         90 |         10 |          0 |        100 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\io.lua                | Lua      |         88 |          1 |          4 |         93 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\luashell.lua          | Lua      |         57 |         11 |          1 |         69 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\poll.lua              | Lua      |         43 |          1 |          4 |         48 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\simpleshell.lua       | Lua      |        160 |         16 |          2 |        178 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\term.lua              | Lua      |         43 |          2 |          0 |         45 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\terminal.lua          | Lua      |        157 |         15 |          7 |        179 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\filesystem.lua             | Lua      |        180 |         19 |          2 |        201 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\full\os.lua                | Lua      |          6 |          1 |          1 |          8 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\init.lua                   | Lua      |        115 |         21 |          2 |        138 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\libs\00_drivers.lua        | Lua      |         64 |          3 |          1 |         68 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\libs\02_automount.lua      | Lua      |         17 |          2 |          1 |         20 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\GitHub.lua         | Lua      |         95 |         17 |          0 |        112 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\arc.lua            | Lua      |        513 |         82 |         68 |        663 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\bitp.lua           | Lua      |         20 |          1 |          0 |         21 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\internet.lua       | Lua      |        129 |          9 |          1 |        139 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\json.lua           | Lua      |          2 |         25 |          1 |         28 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\json_orginal.lua   | Lua      |        281 |         47 |         65 |        393 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\libDeflate.lua     | Lua      |      2,541 |        781 |        293 |      3,615 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\serialize.lua      | Lua      |         67 |          1 |          9 |         77 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\modules\zip.lua            | Lua      |        237 |         17 |         29 |        283 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\objects\AdvancedStream.lua | Lua      |        172 |          8 |          0 |        180 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\objects\Promise.lua        | Lua      |        117 |          9 |          1 |        127 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\objects\SeekableStream.lua | Lua      |         77 |          4 |          5 |         86 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\objects\Stream.lua         | Lua      |         84 |          6 |          4 |         94 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\package.lua                | Lua      |         55 |          0 |          9 |         64 |
+| Total                                                                  |          |      6,285 |      1,204 |        581 |      8,070 |
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+

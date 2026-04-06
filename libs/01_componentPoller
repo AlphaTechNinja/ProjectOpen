@@ -1,6 +1,7 @@
 local kernel = ...
 local event = kernel.event
 local knownComponents = {}
+
 -- Initialize known components
 for addr, type in component.list() do
     knownComponents[addr] = type
@@ -16,6 +17,7 @@ local function componentWatcher()
                 event.push("component_added", addr, type)
             end
         end
+
         -- Detect removed components
         for addr, type in pairs(knownComponents) do
             if not current[addr] then
@@ -23,6 +25,7 @@ local function componentWatcher()
                 event.push("component_removed", addr, type)
             end
         end
+
         coroutine.yield() -- yield to the poller system
 end
 

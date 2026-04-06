@@ -40,6 +40,16 @@ function package.require(name)
 
     error("module '" .. name .. "' not found:\n  tried:\n  " .. table.concat(tried, "\n  "), 2)
 end
+
+function package.requireOptional(name)
+    local ok,pkg = package.require(name)
+    if not ok and pkg then
+        return nil,pkg
+    else
+        return pkg
+    end
+end
+
 function package.delay(lib,full) -- like openos to minimize use of full loading
     return setmetatable(lib,{
         __index = function (t, k)
@@ -50,4 +60,5 @@ function package.delay(lib,full) -- like openos to minimize use of full loading
     })
 end
 require = package.require
+requireOptional = package.requireOptional
 return package

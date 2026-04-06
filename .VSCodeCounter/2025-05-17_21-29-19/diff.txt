@@ -1,0 +1,60 @@
+Date : 2025-05-17 21:29:19
+Directory : c:\Users\kllnm\OneDrive\Desktop\ProjectOpen
+Total : 27 files,  460 codes, 45 comments, 13 blanks, all 518 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Lua      |         27 |        460 |         45 |         13 |        518 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                  |         27 |        460 |         45 |         13 |        518 |
+| . (Files)                                                          |          3 |         55 |          8 |          1 |         64 |
+| bin                                                                |         17 |        277 |         26 |         10 |        313 |
+| bin (Files)                                                        |          8 |        162 |         20 |         10 |        192 |
+| bin\.data                                                          |          1 |          7 |          2 |          0 |          9 |
+| bin\.info                                                          |          8 |        108 |          4 |          0 |        112 |
+| core                                                               |          3 |         93 |          7 |          0 |        100 |
+| full                                                               |          1 |          6 |          1 |          1 |          8 |
+| libs                                                               |          2 |         18 |          2 |          1 |         21 |
+| objects                                                            |          1 |         11 |          1 |          0 |         12 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                           | language | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.data\motd.lua     | Lua      |          7 |          2 |          0 |          9 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\cat.lua      | Lua      |         16 |          3 |          0 |         19 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\cd.lua       | Lua      |         17 |          0 |          0 |         17 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\clear.lua    | Lua      |         11 |          0 |          0 |         11 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\debug.lua    | Lua      |         12 |          1 |          0 |         13 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\echo.lua     | Lua      |         12 |          0 |          0 |         12 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\help.lua     | Lua      |         16 |          0 |          0 |         16 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\ls.lua       | Lua      |         18 |          0 |          0 |         18 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\.info\template.lua | Lua      |          6 |          0 |          0 |          6 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\cd.lua             | Lua      |         15 |          0 |          1 |         16 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\clear.lua          | Lua      |          3 |          0 |          0 |          3 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\debug.lua          | Lua      |         19 |          2 |          3 |         24 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\help.lua           | Lua      |         32 |          9 |          0 |         41 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\ls.lua             | Lua      |         -2 |          0 |          0 |         -2 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\lua.lua            | Lua      |         43 |          3 |          6 |         52 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\motd.lua           | Lua      |         38 |          5 |          0 |         43 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\bin\shutdown.lua       | Lua      |         14 |          1 |          0 |         15 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\simpleshell.lua   | Lua      |         63 |          7 |          0 |         70 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\term.lua          | Lua      |         16 |          0 |          0 |         16 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\core\terminal.lua      | Lua      |         14 |          0 |          0 |         14 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\filesystem.lua         | Lua      |         20 |          2 |          0 |         22 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\full\os.lua            | Lua      |          6 |          1 |          1 |          8 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\init.lua               | Lua      |         25 |          6 |          1 |         32 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\libs\00_drivers.lua    | Lua      |          1 |          0 |          0 |          1 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\libs\02_automount.lua  | Lua      |         17 |          2 |          1 |         20 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\objects\Stream.lua     | Lua      |         11 |          1 |          0 |         12 |
+| c:\Users\kllnm\OneDrive\Desktop\ProjectOpen\package.lua            | Lua      |         10 |          0 |          0 |         10 |
+| Total                                                              |          |        460 |         45 |         13 |        518 |
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+

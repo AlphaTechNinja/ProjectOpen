@@ -2,7 +2,9 @@ local classes = require("classes")
 local Stream = classes.create("Stream")
 function Stream:constructor(data)
     -- inital data
-    checkArg(1,data,{"string","nil"})
+    if type(data) ~= "string" and not data then
+        error("Invalid stream inital data",2)
+    end
     local initdata = {}
     if type(data) == "string" and #data > 0 then
         table.insert(initdata,data)
@@ -17,7 +19,7 @@ local function sanitizedConcat(tab,sep)
     local filtered = {}
     for i=1,#tab do
         if tab[i] ~= nil then
-            table.insert(filtered,tab[i])
+            table.insert(filtered,tostring(tab[i]))
         end
         if type(tab[i]) == "table" then
             error("found a booger "..debug.traceback("",3),2)

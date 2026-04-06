@@ -3,6 +3,7 @@ local io = require("io")
 local term = require("terminal")
 local fs = require("filesystem")
 local Stream = require("Stream")
+local users = require("user")
 local shell = {}
 local _env = {
     CWD="/home/",
@@ -79,18 +80,20 @@ function shell.run(command,out)
     local phrased = shell.phrase(command)
     local target = table.remove(phrased, 1)
     local progPath = fs.combine(_env.PROGS, target)
-
+    if target:sub(1,1) == "/" then
+        progPath = target
+    end
     if fs.exists(progPath) then
         shell.runningProg = progPath
         local ok, err = dofile(progPath, shell, table.unpack(phrased))
         if not ok and err then
             io.stderr:write(("error in command '%s': %s\n"):format(target, err))
-            return false
+            return nil,"Failed to execute"
         end
         if ok then
             out:write(ok)
         end
-        return true
+        return ok
     elseif shell.alias[target] then
         shell.runningProg = shell.alias[target]
         local aliasPath = fs.combine(_env.PROGS, shell.alias[target])
@@ -98,12 +101,12 @@ function shell.run(command,out)
             local ok, err = dofile(aliasPath, shell, table.unpack(phrased))
             if not ok and err then
                 io.stderr:write(("error in alias '%s': %s\n"):format(target, err))
-                return false
+                return nil,"Failed to execute"
             end
             if ok then
                 out:write(ok)
             end
-            return true
+            return ok
         end
     end
 
@@ -164,5 +167,13 @@ function shell.setLocalVar(key,value)
 end
 function shell.getLocalVar(key)
     return shell.getLocalVars()[key]
+end
+-- used for security
+local canGet = true
+function shell.getEnv()
+    shell.getEnv = nil
+    if not canGet then return end
+    canGet = false
+    return _env
 end
 return shell
