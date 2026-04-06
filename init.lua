@@ -74,11 +74,19 @@ function errorf(message, ...)
     error(string.format(message, table.unpack(args)), level + 1)
 end
 -- global inject for user system
+---@class kernalUser
+---@field name string
+---@field level integer
+---@field metadata table<string, string|number>?
+
 local currentuser = {name="kernel",level=math.huge}
+
 useraccess = {
+    ---@param new kernalUser
     setuser = function (new)
         currentuser = new
     end,
+    ---@return kernalUser
     getuser = function ()
         return currentuser
     end
