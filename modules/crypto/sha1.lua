@@ -695,10 +695,10 @@ local xor_with_0x36 = {
    [string.char(254)] = string.char(200),   [string.char(255)] = string.char(201),
 }
 
-
+local sha1m = {}
 local blocksize = 64 -- 512 bits
 
-function hmac_sha1(key, text)
+local function hmac_sha1(key, text)
    assert(type(key)  == 'string', "key passed to hmac_sha1 should be a string")
    assert(type(text) == 'string', "text passed to hmac_sha1 should be a string")
 
@@ -711,7 +711,9 @@ function hmac_sha1(key, text)
 
    return sha1(key_xord_with_0x5c .. sha1_binary(key_xord_with_0x36 .. text))
 end
+sha1m.hmac = hmac_sha1
 
-function hmac_sha1_binary(key, text)
+local function hmac_sha1_binary(key, text)
    return hex_to_binary(hmac_sha1(key, text))
 end
+sha1m.hmac_binary = hmac_sha1_binary
