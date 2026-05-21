@@ -1,5 +1,5 @@
 return {
     root = {
-        privledge = math.huge
+        level = math.huge
     }
 }

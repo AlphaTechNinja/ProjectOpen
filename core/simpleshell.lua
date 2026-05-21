@@ -5,15 +5,17 @@ local fs = require("filesystem")
 local Stream = require("Stream")
 local users = require("user")
 local shell = {}
+
+---@type table<string, string|number|{__shellparse : fun(self : self) : string|number}|table>
 local _env = {
     CWD="/home/",
     HOME="/home/",
-    USER="root",
+    USER=users.getUser(),
     PROGS="/bin/",
     NONE = ""
 }
 shell.alias = {}
-shell.cmdVars = {GLOBAl = _G}
+shell.cmdVars = {GLOBAL = _G}
 shell.outpipe = io.stdout -- just uses stdout as the pipe should be switched to shell.pipe when executing in bash mode
 --shell.pipe = Stream:new() -- we arn't using an IO pipe due to custom behavior
 -- maybe add autocompletion may be a pain to intergrate with term.read but might be able to be done by modding the methods
@@ -68,7 +70,13 @@ function shell.phrase(command)
     local tokens = {}
     for token in command:gmatch("[%S]+") do
         token = token:gsub("%$(%w+)", function(var)
-            return _env[var] or ""
+            local v = _env[var] or ""
+            if type(v) == "table" then
+                if v.__shellparse then
+                    v = v:__shellparse()
+                end
+            end
+            return v
         end)
         table.insert(tokens,token)
     end

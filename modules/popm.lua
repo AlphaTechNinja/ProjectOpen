@@ -78,11 +78,11 @@ function popm.install(descriptor)
                 errorf("Failed to load dependency descriptor for %s reason:%s",n,depDescriptor,2)
             end
             -- check if version matches
-            if not depDescriptor.version = d.expectedVersion then
+            if not depDescriptor.version == d.expectedVersion then
                 errorf("wrong version for dependency %s got version %s",n,depDescriptor.version,2)
             end
             -- check if name matches
-            if not depDescriptor.name = n then
+            if not depDescriptor.name == n then
                 errorf("name mismatch in dependency %s got %s",n,depDescriptor.name,2)
             end
             -- now attempt install
