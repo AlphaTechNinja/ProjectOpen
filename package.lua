@@ -61,4 +61,5 @@ function package.delay(lib,full) -- like openos to minimize use of full loading
 end
 require = package.require
 requireOptional = package.requireOptional
+package.delay(package, "/core/packageplus.lua")
 return package
