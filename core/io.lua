@@ -19,7 +19,7 @@ function IOFile:constructor(path,mode)
     end
 end
 function IOFile:read(len)
-    if self.__close or self.__handle.__close then
+    if self.__close or (self.__handle and self.__handle.__close) then
         error("Attempt to read a closed stream",2)
     end
     if self.__piperead then
@@ -33,7 +33,7 @@ function IOFile:read(len)
     end
 end
 function IOFile:write(data)
-    if self.__close or self.__handle.__close then
+    if self.__close or (self.__handle and self.__handle.__close) then
         error("Attempt to write to a closed stream",2)
     end
     if self.__pipewrite then
@@ -48,7 +48,7 @@ function IOFile:write(data)
     end
 end
 function IOFile:seek(whence,pos)
-    if self.__close or self.__handle.__close then
+    if self.__close or (self.__handle and self.__handle.__close) then
         error("Attempt to seek a closed stream",2)
     end
     if self.__handle then

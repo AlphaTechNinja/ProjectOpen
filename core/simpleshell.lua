@@ -6,11 +6,20 @@ local Stream = require("Stream")
 local users = require("user")
 local shell = {}
 
+function shell.wrapforenv(func)
+    return {
+        __shellparse = func
+    }
+end
+
 ---@type table<string, string|number|{__shellparse : fun(self : self) : string|number}|table>
 local _env = {
     CWD="/home/",
     HOME="/home/",
     USER=users.getUser(),
+    USERPATH=shell.wrapforenv(function ()
+        return "/users/"..users.getUser().name
+    end),
     PROGS="/bin/",
     NONE = ""
 }
@@ -60,6 +69,11 @@ end
 function shell.setenv(name,value)
     checkArg(1,name,"string")
     value = tostring(value)
+    local ev = _env[name]
+    if ev and ev.__shellset then
+        ev.__shellset(ev, value)
+        return
+    end
     _env[name] = value
 end
 os.setenv = shell.setenv
@@ -87,6 +101,9 @@ function shell.run(command,out)
     out = out or shell.outpipe
     local phrased = shell.phrase(command)
     local target = table.remove(phrased, 1)
+    if not target or target == "" then
+        return true
+    end
     local progPath = fs.combine(_env.PROGS, target)
     if target:sub(1,1) == "/" then
         progPath = target
@@ -133,7 +150,7 @@ function shell.setalias(cmd,alias)
 end
 function shell.prompt()
     -- runs a prompt assuming we are on a new line
-    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER..">")
+    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER.name..">")
     local command = term.read()
     shell.run(command)
     --term.newline()

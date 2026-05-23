@@ -232,7 +232,7 @@ end
 ---@return integer
 function file:seek(whence,offset)
     if self.__close then error("Attempted to seek a closed handle",2) end
-    return self.__fs.seek(whence,offset)
+    return self.__fs.seek(self.__handle,whence,offset)
 end
 
 ---@return boolean

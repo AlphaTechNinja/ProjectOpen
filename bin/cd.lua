@@ -5,7 +5,7 @@ local fs = kernel.filesystem
 if #args == 0 then
     errorf("Usage:cd <path>", 2)
 end
-local newpath = fs.resolve(args[1])
+local newpath = shell.resolve(args[1])
 if not fs.exists(newpath) then
     errorf("Directory at '%s' does not exists",newpath,2)
 end

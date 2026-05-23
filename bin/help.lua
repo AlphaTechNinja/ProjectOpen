@@ -6,6 +6,14 @@ if shell.getenv("PROGS") ~= localVars.lastProgs then
     localVars.lastProgs = shell.getenv("PROGS")
     localVars.cache = {}
 end
+if #args < 1 then
+    return [[
+    displays help information for a given program
+    pass -a as the argument to list avaiable docs
+    example:
+    help help
+    ]]
+end
 -- check for -a
 if args[1] == "-a" then
     local list = fs.list(fs.combine(shell.getenv("PROGS"), ".info"))

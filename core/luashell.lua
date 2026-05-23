@@ -35,8 +35,34 @@ local env = {
     term = term,
 
 }
-setmetatable(env,{__index = _G})
+setmetatable(env,{__index = function (_, k)
+    if _G[k] then
+        return _G[k]
+    end
+
+    local ev = envVars[k]
+    if ev then
+        if ev.__shellparse then
+            return ev.__shellparse(ev)
+        end
+        return ev
+    end
+end,__newindex = function (t, k, v)
+    local ev = envVars[k]
+    if ev then
+        if ev.__shellset then
+            ev.__shellset(ev, v)
+        end
+    else
+        rawset(t, k, v)
+    end
+end})
+
 local function execute(str)
+    if str:sub(1,1) == "@" then
+        shell.run(str:sub(2))
+        return
+    end
     local ok,func = pcall(load,str,"=command",nil,env)
     if not ok and func then
         io.stderr:write("Failed to load code (reason):"..func)
@@ -54,7 +80,7 @@ local function execute(str)
 end
 -- new prompter
 function shell.prompt()
-    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER..">")
+    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER.name..">")
     local command = term.read()
     execute(command)
 end
