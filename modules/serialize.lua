@@ -1,5 +1,6 @@
 local serialize = {}
 local json = require("json")
+local filesystem = require("filesystem")
 serialize.serializeFunction = false
 
 local expr = "%s=%s"
@@ -66,11 +67,32 @@ function serialize.deserialize(str,mode)
         end
     end
     local chunk = "return " .. str
+    local safeEnv = {
+        math = math,
+        string = string,
+        table = table,
+        tonumber = tonumber,
+        tostring = tostring,
+        type = type,
+        pairs = pairs,
+        ipairs = ipairs,
+        next = next,
+        select = select
+    }
     if serialize.serializeFunction then
-        return load(chunk)()
-    else
-        return load(chunk, nil, nil, {})()
+        safeEnv.load = load
     end
+    local func, err = load(chunk, "=serialize.deserialize", "t", safeEnv)
+    if not func and err then
+        error(err, 2)
+    end
+    return func()
+end
+
+function serialize.deserializeFile(path, mode)
+    local handle = filesystem.open(path, "r")
+    local raw = handle:readAll()
+    return serialize.deserialize(raw, mode)
 end
 
 return serialize

@@ -34,7 +34,7 @@ end
 ---@return string
 ---@return string
 function fs.splitFilename(path)
-    local name, ext = string.match(path, "(.+)%.(.+)")
+    local name, ext = string.match(path, "(.+)%.(.*)")
     return name, ext
 end
 
@@ -57,6 +57,18 @@ end
 ---@return string
 function fs.combine(...)
     return fs.simplify(table.concat(({...}),"/"))
+end
+
+--- applies the ".." in a cleaner way
+---@param path string
+---@return string
+function fs.stepback(path)
+    local segments = fs.splitPath(path)
+    segments[#segments] = nil
+    if #segments == 0 then
+        return "/"
+    end
+    return "/" .. table.concat(segments, "/")
 end
 -- main logic
 

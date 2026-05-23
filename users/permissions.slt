@@ -1,4 +1,7 @@
 return {
+    kernel = {
+        level = math.huge
+    },
     root = {
         level = math.huge
     }

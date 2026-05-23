@@ -57,6 +57,18 @@ function dofile(path,...)
     end
     return table.unpack(result,2)
 end
+function dofileenv(path, env, ...)
+    local func,err = loadfile(path, nil, env)
+    if not func and err then
+        return nil,err
+    end
+    -- watch for errs
+    local result = {pcall(func,...)}
+    if not result[1] and result[2] then
+        return nil,("failed to do file '%s':\n%s"):format(path,result[2])
+    end
+    return table.unpack(result,2)
+end
 kernel = {}
 function runkernel(path,...)
     return dofile(path,kernel,...)
