@@ -12,6 +12,11 @@ end
 function stream:write(data)
     if self.__writepipe then
         self.__writepipe:write(data)
+        return
+    end
+    if self.__pipewrite then
+        self.__pipewrite:write(data)
+        return
     end
     gpu.set(1,line,data)
     line = line + 1

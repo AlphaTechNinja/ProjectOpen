@@ -6,7 +6,9 @@ package.loaded = {
     classes = kernal.classes,
     os = os,
     component = component,
-    computer = computer
+    computer = computer,
+    bit32 = bit32,
+    bit = bit
 }
 
 package.loaded.package = package

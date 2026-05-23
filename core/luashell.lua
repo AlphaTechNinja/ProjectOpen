@@ -80,7 +80,14 @@ local function execute(str)
 end
 -- new prompter
 function shell.prompt()
-    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER.name..">")
+    local uname = _env.USER
+    if type(uname) == "table" then
+        uname = uname.name
+    end
+    if not uname or uname == "" then
+        uname = require("user").getUser().name
+    end
+    io.stdout:write(fs.simplify(_env.CWD).."/@"..tostring(uname)..">")
     local command = term.read()
     execute(command)
 end

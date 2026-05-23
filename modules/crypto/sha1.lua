@@ -1,5 +1,5 @@
 local classes = require("classes")
-local bit32 = bit32 or bit
+local bit32 = require("crypto.bitcompat")
 
 local sha1 = classes.create("sha1")
 sha1.__index = sha1

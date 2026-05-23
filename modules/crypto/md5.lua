@@ -1,5 +1,5 @@
 local classes = require("classes")
-local bit32 = bit32 or bit
+local bit32 = require("crypto.bitcompat")
 
 local md5 = classes.create("md5")
 md5.__index = md5

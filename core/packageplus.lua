@@ -100,28 +100,26 @@ function PkgInstance:resolveLocal(path, options)
     path = path:sub(1, 2) ~= "./" and path or path:sub(3)
     path = path:sub(1, 1) ~= "/" and path or path:sub(2)
     local basepath = fs.combine(self.localpath, path)
-
-    if not fs.exists(basepath) then
-        return nil, "local path doesnt exists"
-    end
-
-    if fs.isDirectory(basepath) then
-        local resolved, err = self:resolveLocal(fs.combine(basepath, "init.lua"), options)
-        if not resolved then
-            return nil, err
-        end
-        return resolved, fs.stepback(resolved)
-    end
-
     local _, ext = fs.splitFilename(path)
-    if ext and ext ~= "" then
+
+    if fs.exists(basepath) then
+        if fs.isDirectory(basepath) then
+            local resolved, err = self:resolveLocal(fs.combine(basepath, "init.lua"), options)
+            if not resolved then
+                return nil, err
+            end
+            return resolved, fs.stepback(resolved)
+        end
         return basepath, fs.stepback(basepath)
     end
 
-    local withExt = basepath .. ".lua"
-    if fs.exists(withExt) then
-        return withExt, fs.stepback(withExt)
+    if not ext or ext == "" then
+        local withExt = basepath .. ".lua"
+        if fs.exists(withExt) then
+            return withExt, fs.stepback(withExt)
+        end
     end
+
     return nil, "local path doesnt exists"
 end
 
@@ -175,11 +173,14 @@ end
 function PkgInstance:resolve(path, options)
     options = options or {}
     local start = path:sub(1, 1)
-    if start ~= "/" then
+    local isExplicitLocal = (start == "/") or (path:sub(1, 2) == "./")
+
+    if isExplicitLocal then
         local resolved, basepath = self:resolveLocal(path, options)
         if resolved then
             return resolved, basepath, false
         end
+        return nil, "Unable to resolve local path"
     end
 
     local packagepath, basepath, entry = self:resolveUser(path, options)
@@ -255,7 +256,7 @@ function PkgInstance:import(path, options)
         local env = setmetatable({
             package = wrappedPackage
         }, { __index = _G })
-        local chunk, err = loadfile(resolved, nil, nil, env)
+        local chunk, err = loadfile(resolved, "t", env)
         if not chunk and err then
             error(err, 2)
         end

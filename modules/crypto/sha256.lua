@@ -1,5 +1,5 @@
 local classes = require("classes")
-local bit32 = bit32 or bit
+local bit32 = require("crypto.bitcompat")
 
 local sha256 = classes.create("sha256")
 sha256.__index = sha256
@@ -138,6 +138,13 @@ function sha256:final()
         self.h0,self.h1,self.h2,self.h3,
         self.h4,self.h5,self.h6,self.h7
     )
+end
+
+function sha256.hash(data)
+    checkArg(1, data, "string")
+    local hasher = sha256:new()
+    hasher:update(data)
+    return hasher:final()
 end
 
 return sha256

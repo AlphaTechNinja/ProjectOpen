@@ -7,6 +7,10 @@ local users = {}
 local handles = {}
 local USERSPATH = "/users/"
 
+local function hashPassword(password)
+    return sha256.hash(password)
+end
+
 local function loginhandle(name,level)
     for i=#handles, 1, -1 do
         local ok, err = pcall(handles[i],{name=name,level=level})
@@ -63,6 +67,12 @@ local commonPermNames = {
     [math.huge] = "root",
 }
 local function clone(tab)
+    if tab == nil then
+        return nil
+    end
+    if type(tab) ~= "table" then
+        return tab
+    end
     local new = {}
     for n,v in pairs(tab) do
         if type(v) == "table" then
@@ -160,7 +170,7 @@ function users.create(name, level, password)
     local newuser = {level=level}
     if password then
         assert(type(password) == "string","Password must be a string")
-        newuser.passwordsha = sha256(password)
+        newuser.passwordsha = hashPassword(password)
     end
     filesystem.makeDirectory(USERSPATH..name)
     permissions[name] = newuser
@@ -172,7 +182,8 @@ end
 function users.login(name, password)
     local userobj = getuserraw(name)
     if userobj.passwordsha then
-        assert(sha256(password) == userobj.passwordsha,"Wrong password")
+        assert(type(password) == "string", "Password required")
+        assert(hashPassword(password) == userobj.passwordsha,"Wrong password")
     end
     local kernelrep = {
         name = name,

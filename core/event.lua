@@ -53,11 +53,12 @@ function event.wait(time)
     if time < 0.05 then
         return -- too small to wait
     end
+    local start = computer.uptime()
     local deadline = computer.uptime() + time
     while computer.uptime() < deadline do
         event.poll(computer.pullSignal(deadline-computer.uptime()))
     end
-    return computer.uptime() - deadline
+    return computer.uptime() - start
 end
 function event.pullsignal(name,timeout)
     timeout = timeout or math.huge
@@ -71,7 +72,7 @@ function event.pullsignal(name,timeout)
         -- we actually have to handle event checking
         local deadline = computer.uptime() + timeout
         while computer.uptime() < deadline  do
-            local evnt = {computer.pullSignal(timeout)}
+            local evnt = {computer.pullSignal(deadline - computer.uptime())}
             event.poll(table.unpack(evnt))
             if evnt[1] == name then
                 return table.unpack(evnt,2)

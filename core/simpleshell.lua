@@ -68,7 +68,9 @@ function shell.getenv(name)
 end
 function shell.setenv(name,value)
     checkArg(1,name,"string")
-    value = tostring(value)
+    if type(value) ~= "table" then
+        value = tostring(value)
+    end
     local ev = _env[name]
     if ev and ev.__shellset then
         ev.__shellset(ev, value)
@@ -150,7 +152,14 @@ function shell.setalias(cmd,alias)
 end
 function shell.prompt()
     -- runs a prompt assuming we are on a new line
-    io.stdout:write(fs.simplify(_env.CWD).."/@".._env.USER.name..">")
+    local uname = _env.USER
+    if type(uname) == "table" then
+        uname = uname.name
+    end
+    if not uname or uname == "" then
+        uname = users.getUser().name
+    end
+    io.stdout:write(fs.simplify(_env.CWD).."/@"..tostring(uname)..">")
     local command = term.read()
     shell.run(command)
     --term.newline()

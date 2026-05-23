@@ -8,6 +8,12 @@ local ok,err = run_with_traceback(function ()
 -- fresh OS
 -- setup component wrapper for OpenOS compatablity
 component = component
+if not bit and bit32 then
+    bit = bit32
+end
+if not bit32 and bit then
+    bit32 = bit
+end
 setmetatable(component,{
     __index = function (t, k)
         return component.proxy(component.list(k)())
@@ -36,13 +42,13 @@ function readfile(path)
     return table.concat(buffer,"")
 end
 -- loadfile
-function loadfile(path,...)
+function loadfile(path,mode,env)
     -- attempt read
     local data,err = readfile(path)
     if not data and err then
         return nil,("failed to load file '%s':\n%s"):format(path,err)
     end
-    return load(data,"="..path,...)
+    return load(data,"="..path,mode or "bt",env or _G)
 end
 -- dofile
 function dofile(path,...)
@@ -58,7 +64,7 @@ function dofile(path,...)
     return table.unpack(result,2)
 end
 function dofileenv(path, env, ...)
-    local func,err = loadfile(path, nil, env)
+    local func,err = loadfile(path, "bt", env)
     if not func and err then
         return nil,err
     end

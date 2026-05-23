@@ -16,6 +16,7 @@ term.__readbuffer = ""
 term.__lastreadbuffer = "" -- for backspace rendering properly
 term.__blinkstate = false
 term.__blinkEnabled = true
+term.__blinkpos = nil
 local function flip(x, y)
     local char, fg, bg = gpu.get(x, y)
     if not char then return end
@@ -27,31 +28,29 @@ local function flip(x, y)
     gpu.setForeground(oldfg)
 end
 function term.__updateBlink()
-
-    -- Unflip previous if it was different
-    --if term.__lastblinkpos.x ~= term.cursor.x or term.__lastblinkpos.y ~= term.cursor.y and term.__blinkstate then
-    --    flip(term.__lastblinkpos.x, term.__lastblinkpos.y)
-    --end
-
-    -- Flip current
-    if term.__blinkEnabled or term.__blinkstate then
-        local x,y = term.cursor.x,term.cursor.y
-        if term.__readstart then
-            x,y = x + term.__readstart.x,y + term.__readstart.y
-        end
-        flip(term.cursor.x, term.cursor.y)
+    local x, y = term.cursor.x, term.cursor.y
+    if term.__readstart then
+        x, y = term.__readstart.x + #term.__readbuffer, term.__readstart.y
     end
-    -- Update last position
-    --term.__lastblinkpos = { x = term.cursor.x, y = term.cursor.y }
-    term.__blinkstate = not term.__blinkstate
-    if not term.__blinkEnabled then
+
+    if term.__blinkstate and term.__blinkpos then
+        flip(term.__blinkpos.x, term.__blinkpos.y)
         term.__blinkstate = false
+    end
+
+    if term.__blinkEnabled then
+        flip(x, y)
+        term.__blinkstate = true
+        term.__blinkpos = { x = x, y = y }
+    else
+        term.__blinkpos = nil
     end
 end
 function term.__resetblink()
-    if term.__blinkstate then
-        flip(term.cursor.x,term.cursor.y)
+    if term.__blinkstate and term.__blinkpos then
+        flip(term.__blinkpos.x, term.__blinkpos.y)
         term.__blinkstate = false
+        term.__blinkpos = nil
     end
 end
 function term.setBlink(mode)
@@ -164,15 +163,17 @@ term.__lastblink = computer.uptime()
 end,"term")
 -- io.stdout override
 io.stdout.write = function (self,data)
-    if self.__writepipe then
-        self.__writepipe:write(data)
+    local pipe = self.__writepipe or self.__pipewrite
+    if pipe then
+        pipe:write(data)
         return
     end
     term.write(data)
 end
 io.stdin.read = function (self)
-    if self.__readpipe then
-        return self.__readpipe:write(data)
+    local pipe = self.__readpipe or self.__piperead
+    if pipe then
+        return pipe:read()
     end
     return term.read()
 end
