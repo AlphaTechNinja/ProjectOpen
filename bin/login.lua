@@ -11,4 +11,5 @@ end
 
 users.login(name, password)
 shell.setenv("USER", users.getUser())
+shell.setenv("CWD", "/users/"..users.getUser().name.."/home/")
 return ("logged in as '%s'\n"):format(name)

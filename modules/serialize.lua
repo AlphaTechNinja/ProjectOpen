@@ -45,6 +45,10 @@ function serialize.serialize(tab, visited)
         elseif type(v) == "number" then
             if v ~= v then
                 value = "0/0" -- NaN
+            elseif v == math.huge then
+                value = "math.huge"
+            elseif v == -math.huge then
+                value = "-math.huge"
             else
                 value = tostring(v)
             end

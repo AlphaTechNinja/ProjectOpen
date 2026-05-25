@@ -97,7 +97,7 @@ end
 ---@field level integer
 ---@field metadata table<string, string|number>?
 
-local currentuser = {name="kernel",level=math.huge}
+local currentuser = {name="guest",level=0}
 
 useraccess = {
     ---@param new kernalUser
@@ -127,7 +127,55 @@ kernel.io = require("io")
 -- debug
 kernel.term = require("term")
 kernel.terminal = require("terminal")
-kernel.shell = require("luashell")--require("advanceshell").shell
+
+-- shell selector
+local gpu = component.gpu
+local shells = kernel.filesystem.list("/core/shells/")
+local index = 1
+local maxlen = 0
+for i=1, #shells do
+    maxlen = math.max(maxlen, #shells[i])
+end
+
+local function render_shell_select()
+    for i=1, #shells do
+        local endcap = "]"
+        if i == index then
+            endcap = "] <"
+        end
+        gpu.set(1,i,"["..shells[i]..string.rep(" ",maxlen - #shells[i])..endcap)
+    end
+end
+
+local exit = false
+while not exit do
+    render_shell_select()
+    local event = {kernel.event.pullsignal("key_down", 0.05)}
+    if #event > 0 then
+        gpu.set(0,10,tostring(event[3]))
+        local key = event[3]
+        if key == 28 then
+            exit = true
+        elseif key == 200 then
+            -- up
+            gpu.set(0,index,string.rep(" ",maxlen+4))
+            index = math.max(0, index - 1)
+        elseif key == 208 then
+            -- down
+            gpu.set(0,index,string.rep(" ",maxlen+4))
+            index = math.min(#shells, index + 1)
+        end
+    end
+end
+local _, _, name = shells[index]:find("(%w+)%.?%w*")
+
+local w,h = gpu.getResolution()
+gpu.setForeground(0xFFFFFF)
+gpu.setBackground(0x000000)
+gpu.fill(1,1,w,h," ")
+kernel.shell = require("shells."..name)
+-- rest
+--kernel.shell = require("shells.luashell")--require("advanceshell").shell
 kernel.os = require("os")
 kernel.package.delay(kernel.os,"/full/os.lua")
 --kernel.terminal.blinkDisabled()

@@ -4,7 +4,7 @@ local io = require("io")
 local term = require("terminal")
 local fs = require("filesystem")
 local Stream = require("Stream")
-local shell = require("simpleshell")
+local shell = require("shells.simpleshell")
 local _env = shell.getEnv()
 -- executor enviroment
 -- command wrapper
@@ -99,4 +99,5 @@ function shell.getEnv()
     canGet = false
     return _env
 end
+
 return shell

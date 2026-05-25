@@ -6,6 +6,7 @@ local serialize = require("serialize")
 local users = {}
 local handles = {}
 local USERSPATH = "/users/"
+local GUEST = { name = "guest", level = 0 }
 
 local function hashPassword(password)
     return sha256.hash(password)
@@ -89,6 +90,9 @@ local permissions = loadpermissions()
 ---@param name string
 ---@return RawUser
 local function getuserraw(name)
+    if name == "guest" then
+        return GUEST
+    end
     local user = permissions[name]
     assert(user, "No such user "..name)
     return user
@@ -117,6 +121,9 @@ end
 ---@param username string
 ---@return integer
 function users.getLevel(username)
+    if username == "guest" then
+        return 0
+    end
     local user = permissions[username]
     if not user then
         errorf("No such user %s", username, 2)
@@ -180,6 +187,11 @@ end
 
 -- special
 function users.login(name, password)
+    if name == "guest" then
+        access.setuser(clone(GUEST))
+        loginhandle("guest", 0)
+        return
+    end
     local userobj = getuserraw(name)
     if userobj.passwordsha then
         assert(type(password) == "string", "Password required")

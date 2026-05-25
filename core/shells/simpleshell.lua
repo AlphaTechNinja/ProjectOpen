@@ -18,7 +18,13 @@ local _env = {
     HOME="/home/",
     USER=users.getUser(),
     USERPATH=shell.wrapforenv(function ()
-        return "/users/"..users.getUser().name
+        return "/users/"..users.getUser().name.."/"
+    end),
+    HOMEPATH=shell.wrapforenv(function ()
+        return "/users/"..users.getUser().name.."/home/"
+    end),
+    APPSPATH=shell.wrapforenv(function ()
+        return "/users/"..users.getUser().name.."/apps/"
     end),
     PROGS="/bin/",
     NONE = ""
@@ -91,6 +97,7 @@ function shell.phrase(command)
                 if v.__shellparse then
                     v = v:__shellparse()
                 end
+                v = "unknown"
             end
             return v
         end)
@@ -106,9 +113,25 @@ function shell.run(command,out)
     if not target or target == "" then
         return true
     end
+    local currentUser = users.getUser()
+    if currentUser and currentUser.level == 0 then
+        local checkTarget = target
+        if shell.alias[checkTarget] then
+            checkTarget = shell.alias[checkTarget]
+        end
+        local cmd = checkTarget:gsub("^.*/", ""):gsub("%.lua$", "")
+        if cmd ~= "login" and cmd ~= "whoami" then
+            io.stderr:write("guest access: only 'login' and 'whoami' are allowed\n")
+            return nil, "Guest access denied"
+        end
+    end
     local progPath = fs.combine(_env.PROGS, target)
     if target:sub(1,1) == "/" then
         progPath = target
+    end
+    if target:sub(1,1) == "~" then
+        -- app
+        progPath = shell.getenv("APPSPATH"):__shellparse()..target:sub(2)
     end
     if fs.exists(progPath) then
         shell.runningProg = progPath
