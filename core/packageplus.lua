@@ -172,10 +172,24 @@ end
 ---@return boolean?
 function PkgInstance:resolve(path, options)
     options = options or {}
+    local scope = options.scope or "auto"
+    if scope ~= "auto" and scope ~= "local" and scope ~= "user" and scope ~= "global" then
+        errorf("invalid package resolve scope '%s'", tostring(scope), 2)
+    end
+
     local start = path:sub(1, 1)
     local isExplicitLocal = (start == "/") or (path:sub(1, 2) == "./")
 
-    if isExplicitLocal then
+    if scope == "local" then
+        local localTarget = isExplicitLocal and path or ("./" .. path)
+        local resolved, basepath = self:resolveLocal(localTarget, options)
+        if resolved then
+            return resolved, basepath, false
+        end
+        return nil, "Unable to resolve local path"
+    end
+
+    if isExplicitLocal and scope == "auto" then
         local resolved, basepath = self:resolveLocal(path, options)
         if resolved then
             return resolved, basepath, false
@@ -183,18 +197,28 @@ function PkgInstance:resolve(path, options)
         return nil, "Unable to resolve local path"
     end
 
-    local packagepath, basepath, entry = self:resolveUser(path, options)
-    if packagepath then
-        return entry, basepath, true
+    if scope == "auto" or scope == "user" then
+        local packagepath, basepath, entry = self:resolveUser(path, options)
+        if packagepath then
+            return entry, basepath, true
+        end
+        if scope == "user" then
+            return nil, "Unable to resolve user package path"
+        end
     end
 
-    local gPath = self.globalpackages or "/users/kernel/packages"
-    local gPackagepath, gBasepath, gEntry = self:resolveUser(path, {
-        user = options.globalUser or "kernel",
-        packagespath = gPath
-    })
-    if gPackagepath then
-        return gEntry, gBasepath, true
+    if scope == "auto" or scope == "global" then
+        local gPath = self.globalpackages or "/users/kernel/packages"
+        local gPackagepath, gBasepath, gEntry = self:resolveUser(path, {
+            user = options.globalUser or "kernel",
+            packagespath = gPath
+        })
+        if gPackagepath then
+            return gEntry, gBasepath, true
+        end
+        if scope == "global" then
+            return nil, "Unable to resolve global package path"
+        end
     end
 
     return nil, "Unable to resolve path"

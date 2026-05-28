@@ -5,7 +5,7 @@ local registered = {}
 local proxies = setmetatable({},{
     __mode = "v"
 })
-function generateUUID()
+local function generateUUID()
     local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     return template:gsub("[xy]", function (c)
         local v = (c == "x") and math.random(0, 15) or math.random(8, 11)
@@ -14,9 +14,27 @@ function generateUUID()
 end
 
 function drivers.registerdriver(driver)
+    checkArg(1, driver, "table")
+    assert(type(driver.type) == "string" and driver.type ~= "", "driver.type must be a non-empty string")
     local fakeUUID = generateUUID()
+    while registered[fakeUUID] or orginalcomponent.proxy(fakeUUID) do
+        fakeUUID = generateUUID()
+    end
     registered[fakeUUID] = driver
     computer.pushSignal("component_added",fakeUUID,driver.type) -- add support for component_added
+    return fakeUUID
+end
+
+function drivers.unregisterdriver(address)
+    checkArg(1, address, "string")
+    local driver = registered[address]
+    if not driver then
+        return false
+    end
+    registered[address] = nil
+    proxies[address] = nil
+    computer.pushSignal("component_removed", address, driver.type)
+    return true
 end
 -- new list
 function drivers.list(type, exact)
@@ -41,8 +59,9 @@ function drivers.invoke(address,method,...)
     if registered[address] then
         local driver = registered[address]
         if driver[method] then
-            return driver[method](...)
+            return driver[method](driver, ...)
         end
+        return nil, ("no such method '%s'"):format(tostring(method))
     else
         return orginalcomponent.invoke(address,method,...)
     end
@@ -53,7 +72,18 @@ function drivers.proxy(address)
     end
     if registered[address] then
         -- wrap
-        local wrapper = setmetatable({},{__index=registered[address]})
+        local wrapper = setmetatable({
+            address = address,
+            type = registered[address].type
+        },{
+            __index=function (_,k)
+                if registered[address] and registered[address][k] then
+                    return function (_, ...)
+                        return drivers.invoke(address, k, ...)
+                    end
+                end
+            end
+        })
         proxies[address] = wrapper
         return wrapper
     else

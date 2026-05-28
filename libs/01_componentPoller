@@ -14,7 +14,7 @@ local function componentWatcher()
             current[addr] = type
             if not knownComponents[addr] then
                 knownComponents[addr] = type
-                event.push("component_added", addr, type)
+                event.poll("component_added", addr, type)
             end
         end
 
@@ -22,7 +22,7 @@ local function componentWatcher()
         for addr, type in pairs(knownComponents) do
             if not current[addr] then
                 knownComponents[addr] = nil
-                event.push("component_removed", addr, type)
+                event.poll("component_removed", addr, type)
             end
         end
 

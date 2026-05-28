@@ -152,7 +152,6 @@ while not exit do
     render_shell_select()
     local event = {kernel.event.pullsignal("key_down", 0.05)}
     if #event > 0 then
-        gpu.set(0,10,tostring(event[3]))
         local key = event[3]
         if key == 28 then
             exit = true
@@ -194,21 +193,21 @@ shell.setalias("clear.lua","clear")
 shell.setalias("help.lua","help")
 shell.setalias("motd.lua","motd")
 --]]
-local progs = shell.getenv("PROGS")
+local progs = shell:getenv("PROGS")
 for _,file in ipairs(kernel.filesystem.list(progs)) do
     local name = file:sub(1,-5)
-    shell.setalias(file,name)
+    shell:setalias(file,name)
 end
 -- shorter names (and longer names for ls)
-shell.setalias("ls.lua","list")
-shell.setalias("debug.lua","db")
-shell.setalias("echo.lua","ec")
-shell.setalias("help.lua","man")
-shell.setalias("clear.lua","clr")
+shell:setalias("ls.lua","list")
+shell:setalias("debug.lua","db")
+shell:setalias("echo.lua","ec")
+shell:setalias("help.lua","man")
+shell:setalias("clear.lua","clr")
 
 kernel.io.stdout:write(kernel.io.popen("motd 1"))
 kernel.poller.register(function ()
-    local ok, err = xpcall(function() shell.prompt() end, tracebackHandler)
+    local ok, err = xpcall(function() shell:prompt() end, tracebackHandler)
     if not ok then
         kernel.io.stderr:write(err .. "\n")
     end

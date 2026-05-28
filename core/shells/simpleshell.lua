@@ -1,123 +1,99 @@
--- a simple test shell
+local classes = require("classes")
 local io = require("io")
 local term = require("terminal")
 local fs = require("filesystem")
-local Stream = require("Stream")
 local users = require("user")
-local shell = {}
+local Shell = require("shells.Shell")
 
-function shell.wrapforenv(func)
-    return {
-        __shellparse = func
-    }
-end
+local shell = classes.create("SimpleShell", Shell)
 
----@type table<string, string|number|{__shellparse : fun(self : self) : string|number}|table>
-local _env = {
-    CWD="/home/",
-    HOME="/home/",
-    USER=users.getUser(),
-    USERPATH=shell.wrapforenv(function ()
-        return "/users/"..users.getUser().name.."/"
+shell.alias = {}
+shell.cmdVars = { GLOBAL = _G }
+shell.outpipe = io.stdout
+shell.runningProg = nil
+
+shell._env = {
+    CWD = "/home/",
+    HOME = "/home/",
+    USER = users.getUser(),
+    USERPATH = shell.wrapforenv(function()
+        return "/users/" .. users.getUser().name .. "/"
     end),
-    HOMEPATH=shell.wrapforenv(function ()
-        return "/users/"..users.getUser().name.."/home/"
+    HOMEPATH = shell.wrapforenv(function()
+        return "/users/" .. users.getUser().name .. "/home/"
     end),
-    APPSPATH=shell.wrapforenv(function ()
-        return "/users/"..users.getUser().name.."/apps/"
+    APPSPATH = shell.wrapforenv(function()
+        return "/users/" .. users.getUser().name .. "/apps/"
     end),
-    PROGS="/bin/",
+    GLOBALAPPSPATH = "/users/kernel/apps/",
+    PROGS = "/bin/",
     NONE = ""
 }
-shell.alias = {}
-shell.cmdVars = {GLOBAL = _G}
-shell.outpipe = io.stdout -- just uses stdout as the pipe should be switched to shell.pipe when executing in bash mode
---shell.pipe = Stream:new() -- we arn't using an IO pipe due to custom behavior
--- maybe add autocompletion may be a pain to intergrate with term.read but might be able to be done by modding the methods
--- but we can allow suggestions
-function shell.resolve(path)
-    if path:sub(1,1) == "/" then
-        -- absolute
-        return path
-    else
-        return fs.simplify(fs.combine(_env.CWD,path))
+
+shell.searchHooks = {}
+shell:addSearchHook("userApps", function(sh, name)
+    local candidate = fs.combine(sh:getenv("APPSPATH"):__shellparse(), name)
+    if fs.exists(candidate) then
+        return candidate
     end
-end
-function shell.resolveProgram(name)
-    local progPath = fs.combine(_env.PROGS, name)
-    if fs.exists(progPath) then
-        return progPath
-    elseif shell.alias[name] then
-        local aliasPath = fs.combine(_env.PROGS, shell.alias[name])
-        if fs.exists(aliasPath) then
-            return aliasPath
+    if fs.exists(candidate .. ".lua") then
+        return candidate .. ".lua"
+    end
+end)
+shell:addSearchHook("globalApps", function(sh, name)
+    local base = sh:getenv("GLOBALAPPSPATH")
+    if type(base) == "table" and base.__shellparse then
+        base = base:__shellparse()
+    end
+    local candidate = fs.combine(base, name)
+    if fs.exists(candidate) then
+        return candidate
+    end
+    if fs.exists(candidate .. ".lua") then
+        return candidate .. ".lua"
+    end
+end)
+
+function shell:run(command, out)
+    out = out or self.outpipe
+    local assignName, assignValueRaw = command:match("^%s*%$([%a_][%w_]*)%s*=%s*(.-)%s*$")
+    if assignName then
+        local current = self:getenv(assignName)
+        if type(current) == "table" and not current.__shellset then
+            io.stderr:write(("env var '$%s' is read-only\n"):format(assignName))
+            return nil, "Read-only env var"
         end
-    end
-    return nil, "No such program"
-end
-function shell.resolveProgramName(name)
-    -- useful for help it resolves just the name
-    local progPath = fs.combine(_env.PROGS, name)
-    if fs.exists(progPath) then
-        return name
-    elseif shell.alias[name] then
-        local aliasPath = fs.combine(_env.PROGS, shell.alias[name])
-        if fs.exists(aliasPath) then
-            return shell.alias[name]
-        end
-    end
-    return nil, "No such program"
-end
-function shell.getenv(name)
-    checkArg(1,name,"string")
-    return _env[name]
-end
-function shell.setenv(name,value)
-    checkArg(1,name,"string")
-    if type(value) ~= "table" then
-        value = tostring(value)
-    end
-    local ev = _env[name]
-    if ev and ev.__shellset then
-        ev.__shellset(ev, value)
-        return
-    end
-    _env[name] = value
-end
-os.setenv = shell.setenv
-os.getenv = shell.getenv
-function shell.phrase(command)
-    checkArg(1,command,"string")
-    -- simply splits by whitespace and substitues all $ to thier respective _env values
-    local tokens = {}
-    for token in command:gmatch("[%S]+") do
-        token = token:gsub("%$(%w+)", function(var)
-            local v = _env[var] or ""
-            if type(v) == "table" then
-                if v.__shellparse then
-                    v = v:__shellparse()
-                end
-                v = "unknown"
+        local value = assignValueRaw:gsub("^%s+", ""):gsub("%s+$", "")
+        if #value >= 2 then
+            local q1, q2 = value:sub(1, 1), value:sub(-1)
+            if (q1 == "\"" and q2 == "\"") or (q1 == "'" and q2 == "'") then
+                value = value:sub(2, -2)
             end
-            return v
-        end)
-        table.insert(tokens,token)
+        end
+        if value == "true" then
+            value = true
+        elseif value == "false" then
+            value = false
+        else
+            local num = tonumber(value)
+            if num ~= nil then
+                value = num
+            end
+        end
+        self:setenv(assignName, value)
+        return value
     end
-    return tokens
-end
--- programs are passed shell os they can read and execute other commands and also write to the output if needed but if they return a value autowrite
-function shell.run(command,out)
-    out = out or shell.outpipe
-    local phrased = shell.phrase(command)
+    local phrased = self:phrase(command)
     local target = table.remove(phrased, 1)
     if not target or target == "" then
         return true
     end
+
     local currentUser = users.getUser()
     if currentUser and currentUser.level == 0 then
         local checkTarget = target
-        if shell.alias[checkTarget] then
-            checkTarget = shell.alias[checkTarget]
+        if self.alias[checkTarget] then
+            checkTarget = self.alias[checkTarget]
         end
         local cmd = checkTarget:gsub("^.*/", ""):gsub("%.lua$", "")
         if cmd ~= "login" and cmd ~= "whoami" then
@@ -125,33 +101,35 @@ function shell.run(command,out)
             return nil, "Guest access denied"
         end
     end
-    local progPath = fs.combine(_env.PROGS, target)
-    if target:sub(1,1) == "/" then
+
+    local progPath = fs.combine(self._env.PROGS, target)
+    if target:sub(1, 1) == "/" then
         progPath = target
+    elseif target:sub(1, 1) == "~" then
+        progPath = self:getenv("APPSPATH"):__shellparse() .. target:sub(2)
+    else
+        progPath = self:resolveProgram(target) or progPath
     end
-    if target:sub(1,1) == "~" then
-        -- app
-        progPath = shell.getenv("APPSPATH"):__shellparse()..target:sub(2)
-    end
+
     if fs.exists(progPath) then
-        shell.runningProg = progPath
-        local ok, err = dofile(progPath, shell, table.unpack(phrased))
+        self.runningProg = progPath
+        local ok, err = dofile(progPath, self, table.unpack(phrased))
         if not ok and err then
             io.stderr:write(("error in command '%s': %s\n"):format(target, err))
-            return nil,"Failed to execute"
+            return nil, "Failed to execute"
         end
         if ok then
             out:write(ok)
         end
         return ok
-    elseif shell.alias[target] then
-        shell.runningProg = shell.alias[target]
-        local aliasPath = fs.combine(_env.PROGS, shell.alias[target])
+    elseif self.alias[target] then
+        self.runningProg = self.alias[target]
+        local aliasPath = fs.combine(self._env.PROGS, self.alias[target])
         if fs.exists(aliasPath) then
-            local ok, err = dofile(aliasPath, shell, table.unpack(phrased))
+            local ok, err = dofile(aliasPath, self, table.unpack(phrased))
             if not ok and err then
                 io.stderr:write(("error in alias '%s': %s\n"):format(target, err))
-                return nil,"Failed to execute"
+                return nil, "Failed to execute"
             end
             if ok then
                 out:write(ok)
@@ -164,73 +142,33 @@ function shell.run(command,out)
     return false
 end
 
-function shell.execute(...) -- same as shell.run(table.concat({...}," "))
-    shell.run(table.concat({...}," "))
-end
-function shell.executePipe(out,...)
-    shell.run(table.concat({...}," "),out)
-end
-function shell.setalias(cmd,alias)
-    shell.alias[alias] = cmd
-end
-function shell.prompt()
-    -- runs a prompt assuming we are on a new line
-    local uname = _env.USER
-    if type(uname) == "table" then
-        uname = uname.name
-    end
-    if not uname or uname == "" then
-        uname = users.getUser().name
-    end
-    io.stdout:write(fs.simplify(_env.CWD).."/@"..tostring(uname)..">")
+function shell:prompt()
+    io.stdout:write(fs.simplify(self._env.CWD) .. "/@" .. self:getPromptUser() .. ">")
     local command = term.read()
-    shell.run(command)
-    --term.newline()
+    self:run(command)
 end
-local io = require("io")
+
 function io.popen(command)
-    local output = {__data={}}
+    local output = { __data = {} }
     function output:write(data)
-        table.insert(self.__data,data)
+        table.insert(self.__data, data)
     end
-    -- execute command
-    -- and catch error
-    local ok,err = pcall(shell.run,command,output)
+    local ok, err = pcall(function()
+        shell:run(command, output)
+    end)
     if not ok and err then
         return nil, err
     end
-    -- else return pipe contents
-    return table.concat(output.__data,"")
+    return table.concat(output.__data, "")
 end
--- cmdvars used to store session data between commands
-function shell.getCmdVars(name)
-    if not shell.cmdVars[name] then
-        shell.cmdVars[name] = {}
-    end
-    return shell.cmdVars[name]
-end
-function shell.setCmdVar(name,key,value)
-    shell.getCmdVars(name)[key] = value
-end
-function shell.getCmdVar(name,key)
-    return shell.getCmdVars(name)[key]
-end
--- local vars (used in help to cache commands)
-function shell.getLocalVars()
-    return shell.getCmdVars(shell.runningProg or "GLOBAL")
-end
-function shell.setLocalVar(key,value)
-    shell.getLocalVars()[key] = value
-end
-function shell.getLocalVar(key)
-    return shell.getLocalVars()[key]
-end
--- used for security
+
 local canGet = true
-function shell.getEnv()
-    shell.getEnv = nil
-    if not canGet then return end
+function shell:getEnv()
+    if not canGet then
+        return
+    end
     canGet = false
-    return _env
+    return self._env
 end
+
 return shell
