@@ -1,5 +1,6 @@
 local classes = require("classes")
 
+local Tokenizer = package.import("./tokenizer", { scope = "local" })
 local Pattern = package.import("./pattern", { scope = "local" })
 local PatternCollection = package.import("./patternCollection", { scope = "local" })
 local Token = package.import("./token", { scope = "local" })
@@ -81,6 +82,10 @@ function Lang:toCollection(converterFactory)
     end
 
     return collection
+end
+
+function Lang:toTokenizer(converterFactory, options)
+    return Tokenizer:new(self:toCollection(converterFactory), options)
 end
 
 function Lang:__tostring()

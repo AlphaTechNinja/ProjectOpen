@@ -78,7 +78,7 @@ function PatternCollection:match(text, init)
         if result then
             local candidate = result.token or result
             local start = result.start or candidate.location or init
-            local finish = result.finish or candidate:getEnd() or start
+            local finish = result.finish or (candidate.getEnd and candidate:getEnd()) or start
 
             if not best
                 or start < best.start
@@ -122,3 +122,4 @@ function PatternCollection:__len()
 end
 
 return PatternCollection
+

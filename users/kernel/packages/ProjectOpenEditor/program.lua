@@ -46,6 +46,13 @@ function Program:addToken(token)
     return token
 end
 
+function Program:setTokens(tokens)
+    assert(type(tokens) == "table", "tokens expected")
+    self.tokens = cloneTokens(tokens)
+    sortByLocation(self.tokens)
+    return self:markDirty(true)
+end
+
 function Program:getTokenAt(position)
     for i = 1, #self.tokens do
         local token = self.tokens[i]
@@ -149,6 +156,19 @@ function Program:removeAt(position, length)
         token = nil
     }
     return self:applyEdit(edit)
+end
+
+function Program:tokenize(tokenizer, options)
+    assert(type(tokenizer) == "table", "tokenizer expected")
+    if tokenizer.tokenizeProgram then
+        return tokenizer:tokenizeProgram(self, options)
+    end
+    if tokenizer.tokenize then
+        self.tokens = tokenizer:tokenize(self.buffer, options)
+        sortByLocation(self.tokens)
+        return self:markDirty(true)
+    end
+    error("tokenizer does not implement tokenizeProgram or tokenize", 2)
 end
 
 function Program:__tostring()
