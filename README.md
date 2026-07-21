@@ -1,10 +1,19 @@
 # ProjectOpen
 Another OpenComputers OS
+
 # Features
-It contains a simple shell interface to see all commands do `ls /bin/`
++ It contains a simple shell interface to see all commands do `ls /bin/`
 and for info on a command use either man or help to see how it is used.
-I have plans for a package manager soon and auto completions so those 
-will be added too
+
++ A system package manager that users can also easily use.
+
+## Planned
+
++ System apps
++ Proper installer
++ Proper security
++ User oriented package system
+
 # Install
 currently there is no installer all installs will either have to be done
 through a git fetching script on a computer with an internet card or you
