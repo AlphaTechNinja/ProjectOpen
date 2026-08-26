@@ -75,13 +75,22 @@ end
 ---@param descend string?
 ---@return PkgInstance
 function PkgInstance:constructor(from, descend)
+    -- added children to improve consistency and loading performance (more modules get cached)
+    if from and from.children[descend] then
+        return from.children[descend]
+    end
+    
     local o = {}
     if from then
         o.localpath = from.localpath .. (descend and ("/" .. descend) or "")
         o.userpackages = from.userpackages
         o.globalpackages = from.globalpackages
+        if not from.isRoot then
+            from.children[descend] = o
+        end
     end
     o.loaded = {}
+    o.children = {}
     return setmetatable(o, self)
 end
 
@@ -90,6 +99,7 @@ PkgInstance.userpackages = ""
 PkgInstance.localpath = "/"
 
 package.globalinstance = PkgInstance:constructor()
+package.globalinstance.isRoot = true
 
 function PkgInstance:descend(path)
     return PkgInstance:constructor(self, path)

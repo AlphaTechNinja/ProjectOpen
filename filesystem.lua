@@ -105,6 +105,13 @@ end
 
 ---@param path string
 ---@return boolean
+function fs.delete(path)
+    local localpath, filesystem = fs.resolve(path)
+    return filesystem.delete(localpath)
+end
+
+---@param path string
+---@return boolean
 function fs.isReadOnly(path)
     local localpath, filesystem = fs.resolve(path)
     return filesystem.isReadOnly()
@@ -134,6 +141,26 @@ end
 ---@param source string
 ---@param dest string
 ---@return boolean
+function fs.copy(source,dest)
+    if fs.isDirectory(source) then
+        -- recursive descent
+        local files = fs.list(source)
+        for i=1, #files do
+            local file = files[i]
+            fs.copy(fs.combine(source, file), fs.combine(dest, file))
+        end
+    else
+        -- copy file
+        local readhandle = fs.open(source,"r")
+        local writehandle = fs.open(dest,"w")
+        writehandle:write(readhandle:readAll())
+        writehandle:close()
+    end
+end
+
+---@param source string
+---@param dest string
+---@return boolean
 function fs.rename(source,dest)
     local slocalpath, sfilesystem = fs.resolve(source)
     local dlocalpath, dfilesystem = fs.resolve(dest)
@@ -141,11 +168,11 @@ function fs.rename(source,dest)
     if sfilesystem == dfilesystem then
         return sfilesystem.rename(slocalpath,dlocalpath)
     end
-    -- else open a handle then move data
-    local readhandle = fs.open(source,"r")
-    local writehandle = fs.open(dest,"w")
-    writehandle:write(readhandle:readAll())
-    writehandle:close()
+    -- else call a normal copy
+    fs.copy(source, dest)
+    -- and destroy
+    fs.delete(source)
+    
     return true
 end
 
