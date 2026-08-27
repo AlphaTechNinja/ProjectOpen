@@ -36,11 +36,50 @@ function poller.poll(...)
         if coroutine.status(co) == "dead" then
             poller.registered[name] = nil
         else
-            local ok, err = coroutine.resume(co, ...)
+            local ok, err = poller.resumeLocked(co, function ()
+                -- logging may go here in debug
+            end, nil, ...)
             if not ok and err then
                 io.stderr:write(("poller '%s' crashed: %s\n"):format(name, err))
                 poller.registered[name] = nil
             end
+        end
+    end
+end
+
+-- thread locking
+local locks = {}
+function poller.yieldLocked(callback, ...)
+    local thread = coroutine.running()
+    if locks[thread] then
+        error("Coroutine is already locked", 2)
+    end
+    local key = {} -- any unique object works
+    locks[thread] = key
+    
+    callback(key)
+    return coroutine.yield(...)
+end
+
+function poller.resumeLocked(thread, mode, key, ...)
+    mode = mode or "default"
+    if not locks[thread] then
+        return coroutine.resume(thread, ...)
+    end
+    
+    if locks[thread] == key then
+        locks[thread] = nil -- unlock
+        return coroutine.resume(thread, ...)
+    else
+        -- check mode
+        if type(mode) == "function" then
+            -- fail callback
+            return mode()
+        end
+        if mode == "default" then
+            error("can not unlock coroutine "..thread.." as the provided key is invalid", 2)
+        elseif mode == "silent" then
+            return
         end
     end
 end
