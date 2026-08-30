@@ -1,6 +1,14 @@
 --my latest version of classes
+---@generic T
+---@class classes
+---@field constructor fun(... : any) : T
 local classes = {}
 classes.__index = classes
+
+--- Create a class
+---@param name string
+---@param ... classes
+---@return classes
 function classes.create(name,...)
     local args = {...}
     if #args > 1 then

@@ -61,6 +61,12 @@ function poller.yieldLocked(callback, ...)
     return coroutine.yield(...)
 end
 
+--- Resume a locked thread
+---@param thread thread
+---@param mode function | "defualt" | "silent"
+---@param key table?
+---@param ... any
+---@return boolean?
 function poller.resumeLocked(thread, mode, key, ...)
     mode = mode or "default"
     if not locks[thread] then
