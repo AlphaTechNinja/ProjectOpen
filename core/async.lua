@@ -13,6 +13,7 @@ local Async = classes.create("Async")
 ---@return Async<T>
 function Async:constructor(body)
   local o = setmetatable({_body = body, _state = "pending", _waiters = {}}, self)
+  ---@cast o Async
   -- run body async
   local bodyCo = coroutine.wrap(body)
   bodyCo(o, function (...) return o:resolve(...) end, function (...) return o:reject(...) end)

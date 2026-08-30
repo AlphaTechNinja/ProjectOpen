@@ -6,6 +6,8 @@ local kernal = ...
 local classes = kernal.classes
 ---@class fs
 local fs = {}
+
+---@type table<string, string|table|ComponentFilesystem>
 local mounts = {
     ["/"] = computer.getBootAddress()
 } -- protect mounts
@@ -74,7 +76,7 @@ end
 
 ---@param path string
 ---@return string
----@return table|unknown
+---@return table|ComponentFilesystem
 function fs.resolve(path)
     path = fs.simplify(path)
     local fullpath = "/"
@@ -177,7 +179,7 @@ function fs.rename(source,dest)
 end
 
 ---@param path string
----@param filesystem any
+---@param filesystem table|string
 function fs.mount(path,filesystem)
     checkArg(2,filesystem,{"table","string"})
     if mounts[path] then

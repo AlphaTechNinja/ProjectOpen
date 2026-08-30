@@ -49,6 +49,11 @@ end
 
 -- thread locking
 local locks = {}
+
+--- Yield and pass a key to the callback to unlock
+---@param callback fun(key : table) : nil
+---@param ... any
+---@return ...
 function poller.yieldLocked(callback, ...)
     local thread = coroutine.running()
     if locks[thread] then
@@ -63,7 +68,7 @@ end
 
 --- Resume a locked thread
 ---@param thread thread
----@param mode function | "defualt" | "silent"
+---@param mode function | "default" | "silent" | nil
 ---@param key table?
 ---@param ... any
 ---@return boolean?
