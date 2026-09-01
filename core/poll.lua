@@ -46,7 +46,6 @@ function poller.poll(...)
         end
     end
 end
-
 -- thread locking
 local locks = {}
 

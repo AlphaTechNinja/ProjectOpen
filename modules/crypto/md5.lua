@@ -1,6 +1,11 @@
 local classes = require("classes")
 local bit32 = require("crypto.bitcompat")
 
+---@class md5 : classes
+---@field a integer
+---@field b integer
+---@field c integer
+---@field d integer
 local md5 = classes.create("md5")
 md5.__index = md5
 

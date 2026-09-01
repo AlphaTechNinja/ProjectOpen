@@ -90,6 +90,7 @@ function serialize.deserialize(str,mode)
     if not func and err then
         error(err, 2)
     end
+    ---@cast func function
     return func()
 end
 

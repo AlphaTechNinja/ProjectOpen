@@ -1,4 +1,6 @@
 local classes = require("classes")
+
+---@class SeekableStream : classes
 local Stream = classes.create("SeekableStream")
 Stream.__pos = 1
 function Stream:constructor(data)
@@ -9,6 +11,9 @@ end
 function Stream:__tostring()
     return self.__data
 end
+
+--- Write stream
+---@param data string
 function Stream:write(data)
     checkArg(1,data,"string")
     if self.__pipewrite then
@@ -26,6 +31,11 @@ function Stream:write(data)
         self.__pos = self.__pos + #data
     end
 end
+
+--- Read stream
+---@param len integer
+---@param consume boolean?
+---@return string
 function Stream:read(len,consume)
     if self.__piperead then
         return self.__piperead:read(len)
@@ -52,10 +62,16 @@ function Stream:read(len,consume)
     return data
 end
 
+--- Flush data
+---@return string
 function Stream:flush()
     return self:read(math.huge)
 end
 -- piping
+
+--- Pipe to a different stream
+---@param pipe {read : (fun(self : self, len : integer) : string)?, write : (fun(self : self, data : string))?}
+---@param mode "r" | "w" | "rw"
 function Stream:pipe(pipe,mode)
     checkArg(1,pipe,"table")
     if mode == "r" then
@@ -73,6 +89,10 @@ function Stream:pipe(pipe,mode)
         errorf("Invalid piping mode '%s'",mode,2)
     end
 end
+
+--- Seek
+---@param whence "start" | "relative" | "end"
+---@param pos integer
 function Stream:seek(whence,pos)
     whence = whence or "start"
     if whence == "start" then

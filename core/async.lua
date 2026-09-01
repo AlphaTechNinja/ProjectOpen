@@ -5,6 +5,7 @@ local classes = require("classes")
 ---@class Async<T> : classes
 ---@field _state "pending"|"resolved"|"rejected"
 ---@field _waiters [{co : thread, key : any}]
+---@field results any[]?
 local Async = classes.create("Async")
 
 --- Create a Async object
@@ -63,6 +64,7 @@ end
 ---@return T
 function Async:await()
   if self._state ~= "pending" then
+    ---@diagnostic disable-next-line
     return table.unpack(self.results)
   end
   
@@ -78,6 +80,7 @@ function Async:await()
   if not ok then
     error(results[1], 2)
   else
+    ---@diagnostic disable-next-line
     return table.unpack(results)
   end
 end
@@ -111,7 +114,7 @@ function Async:catch(body)
     if ok then
       res(table.unpack(results))
     else
-      local bodyRes = {pcall(body, tagle.unpack(results))}
+      local bodyRes = {pcall(body, table.unpack(results))}
       local bodyOk = table.remove(bodyRes, 1)
       if bodyOk then
         res(table.unpack(bodyRes))
@@ -125,7 +128,7 @@ end
 -- helpers
 
 --- Waits for all passed Async objects
----@param ... : Async
+---@param ... Async
 ---@return [any]
 function Async:all(...)
   local asyncs = {...}
@@ -146,7 +149,7 @@ function Async:all(...)
 end
 
 --- Waits for any Async to finish
----@param ... : Async
+---@param ... Async
 ---@return any
 function Async:race(...)
   local asyncs = {...}
@@ -157,11 +160,13 @@ function Async:race(...)
         if not self:completed() then
           res(table.unpack(results))
         end
+        return nil
       end)
       async:catch(function (results)
         if not self:completed() then
           rej(table.unpack(results))
         end
+        return nil
       end)
     end
   end)

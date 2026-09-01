@@ -162,6 +162,9 @@ term.__lastblink = computer.uptime()
     term.__handleread()
 end,"term")
 -- io.stdout override
+---
+---@param self SeekableStream
+---@param data string
 io.stdout.write = function (self,data)
     local pipe = self.__writepipe or self.__pipewrite
     if pipe then
@@ -170,6 +173,10 @@ io.stdout.write = function (self,data)
     end
     term.write(data)
 end
+
+--- 
+---@param self SeekableStream
+---@return string
 io.stdin.read = function (self)
     local pipe = self.__readpipe or self.__piperead
     if pipe then

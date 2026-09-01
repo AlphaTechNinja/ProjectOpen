@@ -4,4 +4,4 @@ os.version = "ProjectOpen 1.0"
 os.driversEnabled = true -- incase i make a fork os that is the same but a light version without drivers
 os.shellVersion = "1.0"
 os.supportsBash = false -- not implemented
-os.execute = require("simpleshell").execute
+--os.execute = require("simpleshell").execute added by the shell itself

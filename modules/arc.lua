@@ -1,7 +1,7 @@
-local classes = require(".classes")
-local Adv = require(".AdvancedStream")
+local classes = require("classes")
+local Adv = require("AdvancedStream")
 local Stream, Reference = Adv.Stream, Adv.Reference
-local LibDeflate = require(".LibDeflate")
+local LibDeflate = require("LibDeflate")
 local bit = bit
 
 -- bit helpers
@@ -329,11 +329,17 @@ function ARC.autoUnarchive(data)
 end
 
 -- Many-Archive (Marc)
+---@class Marc : classes
+---@field mode "r" | "w"
+---@field data string
+---@field __cache table<string, {name : string, location : integer}>?
 local Marc = classes.create("ManyArchive")
 function Marc:constructor(mode, data)
     return setmetatable({ files = {}, data = data, mode = mode or "w" }, self)
 end
 
+--- List archives
+---@return table<string, {name : string, location : integer}>
 function Marc:listArchives()
     assert(self.mode == "r", "not in reading mode")
     local list = {}
@@ -459,11 +465,14 @@ function ARC.extract(arc,path)
     -- extract all files
     for i=1,#files do
         local cur = files[i]
-        local full = marc:extract(i.name)
+        local full = marc:extract(cur.name)
         local handle = io.open(joinpath(path,cur.name),"w")
+        if not handle then
+            error("Failed to open file "..cur.name, 2)
+        end
         handle:write(full.data)
         handle:close()
-        print(i.name.." -> "..joinpath(path,cur.name))
+        print(cur.name.." -> "..joinpath(path,cur.name))
     end
 end
 function ARC.compress(path,platform)
@@ -488,7 +497,7 @@ function ARC.compress(path,platform)
         -- search for files
         local files = recursiveSearch(path)
         -- setup .marc
-        local marc = marc:new("w")
+        local marc = Marc:new("w")
         for file in each(files) do
             local contents = read(file)
             marc:addFile(file,contents,{})
@@ -500,6 +509,9 @@ function ARC.compress(path,platform)
         local function list(path)
             local contents = {}
             local handle = io.popen("ls "..path)
+            if not handle then
+                error("Failed to list files in "..path, 2)
+            end
             for line in handle:lines() do
                 contents[#contents+1] = line
             end
@@ -521,9 +533,12 @@ function ARC.compress(path,platform)
         -- search for files
         local files = recursiveSearch(path)
         -- setup .marc
-        local marc = marc:new("w")
+        local marc = Marc:new("w")
         for file in each(files) do
             local handle = io.open(file,"r")
+            if not handle then
+                error("Failed to open file "..file, 2)
+            end
             local contents = handle:read(math.huge)
             handle:close()
             marc:addFile(file,contents,{})
@@ -532,18 +547,21 @@ function ARC.compress(path,platform)
         return marc:compress()
     elseif platform == "computercraft" or platform == "cc" then
         -- TODO: add ComputerCraft (and CC: Tweaked) support
+        
         return ARC.compress(path,{
                 read = function (p)
+                        ---@diagnostic disable-next-line
                         local handle = fs.open(p,"r")
                         if not handle then return nil end
                         local data = handle.readAll()
                         return data
                     end,
                 list = function (p)
+                        ---@diagnostic disable-next-line
                         return fs.list(p)
                     end
             })
-    elseif platform == "opencomputers" or platerform == "oc" then
+    elseif platform == "opencomputers" or platform == "oc" then
         -- TODO: add OpenComputer (OpenOS) and standalone support
     end
     error("Unsupported platform "..platform,2)

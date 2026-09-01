@@ -110,6 +110,13 @@ end
 -- Framebuffer
 ----------------------------------------------------------------
 
+--- Set a single cell
+---@param x integer
+---@param y integer
+---@param bg integer
+---@param fg integer
+---@param char string
+---@return boolean
 function FrameBuffer:setCell(x, y, bg, fg, char)
   self:checkCellBounds(x, y)
 
@@ -135,7 +142,11 @@ function FrameBuffer:setCell(x, y, bg, fg, char)
   return true
 end
 
-
+--- Get a single cell
+---@param x integer
+---@param y integer
+---@param clone boolean?
+---@return [string, integer, integer]
 function FrameBuffer:getCell(x, y, clone)
   self:checkCellBounds(x, y)
 
@@ -157,11 +168,15 @@ end
 -- GPU state
 ----------------------------------------------------------------
 
+--- Get background color
+---@return integer
 function FrameBuffer:getBackground()
   return self.background
 end
 
-
+--- Set background color
+---@param color integer
+---@return boolean
 function FrameBuffer:setBackground(color)
   checkArg(1, color, "number")
 
@@ -170,12 +185,15 @@ function FrameBuffer:setBackground(color)
   return true
 end
 
-
+--- Get foreground color
+---@return integer
 function FrameBuffer:getForeground()
   return self.foreground
 end
 
-
+--- Set foreground color
+---@param color integer
+---@return boolean
 function FrameBuffer:setForeground(color)
   checkArg(1, color, "number")
 
@@ -184,17 +202,21 @@ function FrameBuffer:setForeground(color)
   return true
 end
 
-
+--- Max depth
+---@return integer
 function FrameBuffer:maxDepth()
   return 8
 end
 
-
+--- Get depth
+---@return integer
 function FrameBuffer:getDepth()
   return self.colorDepth
 end
 
-
+--- Set depth
+---@param level integer
+---@return boolean
 function FrameBuffer:setDepth(level)
   checkArg(1, level, "number")
 
@@ -213,16 +235,24 @@ end
 -- Resolution
 ----------------------------------------------------------------
 
+--- Get max resolution
+---@return integer
+---@return integer
 function FrameBuffer:maxResolution()
   return math.huge, math.huge
 end
 
-
+--- Get current resolution
+---@return integer
+---@return integer
 function FrameBuffer:getResolution()
   return self.width, self.height
 end
 
-
+--- Set resolution
+---@param width integer
+---@param height integer
+---@return boolean
 function FrameBuffer:setResolution(width, height)
   checkArg(1, width, "number")
   checkArg(2, height, "number")
@@ -262,6 +292,12 @@ end
 -- GPU-like operations
 ----------------------------------------------------------------
 
+--- GPU like get
+---@param x integer
+---@param y integer
+---@return string
+---@return integer
+---@return integer
 function FrameBuffer:get(x, y)
   local cell = self:getCell(x, y)
 
@@ -270,30 +306,35 @@ function FrameBuffer:get(x, y)
   return cell[1], cell[3], cell[2]
 end
 
-
-function FrameBuffer:set(x, y, string, vertical)
+--- GPU like set
+---@param x integer
+---@param y integer
+---@param value string
+---@param vertical boolean?
+---@return boolean
+function FrameBuffer:set(x, y, value, vertical)
   checkArg(1, x, "number")
   checkArg(2, y, "number")
-  checkArg(3, string, "string")
+  checkArg(3, value, "string")
 
   if vertical then
-    for i = 1, #string do
+    for i = 1, #value do
       self:setCell(
         x,
         y + i - 1,
         self.background,
         self.foreground,
-        string:sub(i, i)
+        value:sub(i, i)
       )
     end
   else
-    for i = 1, #string do
+    for i = 1, #value do
       self:setCell(
         x + i - 1,
         y,
         self.background,
         self.foreground,
-        string:sub(i, i)
+        value:sub(i, i)
       )
     end
   end
@@ -301,7 +342,13 @@ function FrameBuffer:set(x, y, string, vertical)
   return true
 end
 
-
+--- GPU like fill
+---@param x integer
+---@param y integer
+---@param width integer
+---@param height integer
+---@param char string
+---@return boolean
 function FrameBuffer:fill(x, y, width, height, char)
   checkArg(1, x, "number")
   checkArg(2, y, "number")
@@ -327,7 +374,14 @@ function FrameBuffer:fill(x, y, width, height, char)
   return true
 end
 
-
+--- GPU like copy
+---@param x integer
+---@param y integer
+---@param width integer
+---@param height integer
+---@param tx integer
+---@param ty integer
+---@return boolean
 function FrameBuffer:copy(x, y, width, height, tx, ty)
   checkArg(1, x, "number")
   checkArg(2, y, "number")
@@ -385,6 +439,8 @@ end
 -- Framebuffer cloning
 ----------------------------------------------------------------
 
+--- Clone framebuffer
+---@return FrameBuffer
 function FrameBuffer:clone()
   local o = setmetatable({}, getmetatable(self))
 
@@ -422,6 +478,9 @@ end
 -- Diff pipeline
 ----------------------------------------------------------------
 
+--- Compute differences
+---@param previous FrameBuffer
+---@return {x : integer, y : integer, text : string, foreground : integer, background : integer}[]
 function FrameBuffer:diff(previous)
   checkArg(1, previous, "table")
 
@@ -499,6 +558,9 @@ end
 -- Render operations
 ----------------------------------------------------------------
 
+--- Renders a set of operations onto the screen
+---@param operations {x : integer, y : integer, text : string, foreground : integer, background : integer}[]
+---@return boolean
 function FrameBuffer:renderOperations(operations)
   local gpu = self.gpu
 
@@ -529,10 +591,13 @@ end
 -- Render
 ----------------------------------------------------------------
 
+--- Render next frame
+---@param previous any
+---@return { x: integer, y: integer, text: string, foreground: integer, background: integer []}
 function FrameBuffer:render(previous)
-  -- No previous frame means everything needs to be drawn.
+  -- No previous frame means everything needs to be drawn
   if not previous then
-    previous = FrameBuffer:blank(
+    previous = FrameBuffer.blank(
       self.width,
       self.height,
       self.colorDepth,
@@ -552,13 +617,21 @@ end
 -- Blank framebuffer
 ----------------------------------------------------------------
 
+--- Makes a blank framebuffer
+---@param width integer
+---@param height integer
+---@param colorDepth integer
+---@param gpu ComponentGPU
+---@return FrameBuffer
 function FrameBuffer.blank(width, height, colorDepth, gpu)
-  return FrameBuffer:new(
+  local buffer = FrameBuffer:new(
     width,
     height,
     colorDepth,
     gpu
   )
+  ---@cast buffer FrameBuffer
+  return buffer
 end
 
 FrameBuffer.__mutates = {
@@ -576,6 +649,7 @@ FrameBuffer.__mutates = {
 ---@field viewport {x: number, y: number, width: number, height: number}
 ---@field dirty boolean
 ---@field owners table<number, table<number, TermBox>>
+---@field gpu ComponentGPU
 ---@field currentFrame FrameBuffer?
 local TermBoxWorld = classes.create("TermBoxWorld")
 
@@ -901,6 +975,8 @@ end
 ---@field dirty boolean
 ---@field world TermBoxWorld?
 ---@field events EventSystem
+---@field onRemoving (fun(self : self) : nil)?
+---@field onResize (fun(self : self, width : integer, height : integer) : nil)?
 local TermBox = classes.create("TermBox")
 
 termbox.TermBox = TermBox

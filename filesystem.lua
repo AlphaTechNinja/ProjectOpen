@@ -151,13 +151,16 @@ function fs.copy(source,dest)
             local file = files[i]
             fs.copy(fs.combine(source, file), fs.combine(dest, file))
         end
+        return true
     else
         -- copy file
         local readhandle = fs.open(source,"r")
         local writehandle = fs.open(dest,"w")
         writehandle:write(readhandle:readAll())
         writehandle:close()
+        return true
     end
+    return false
 end
 
 ---@param source string
@@ -303,6 +306,7 @@ function fs.open(path,mode)
     return file:new(path,mode)
 end
 -- overrides
+---@diagnostic disable-next-line
 function readfile(path)
     local handle = fs.open(path,"r")
     return handle:readAll()

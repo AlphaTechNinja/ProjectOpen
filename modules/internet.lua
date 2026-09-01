@@ -1,7 +1,11 @@
 -- internet module
 local classes = require("classes")
 local internet = {}
+---@class InternetHandle : classes
+---@field __handle InternetHTTPHandle
 local InternetHandle = classes.create("InternetHandle")
+---@class TCPSocket : classes
+---@field __handle InternetTCPConnection
 local TCPSocket = classes.create("TCPSocket")
 function InternetHandle:constructor(...)
     if not component.isAvailable("internet") then
@@ -9,8 +13,9 @@ function InternetHandle:constructor(...)
     end
     -- runs the http function fetch
     local internetCard = component.internet
+    ---@cast internetCard ComponentInternet
     local handle = internetCard.request(...)
-    if not handle.finishedConnect() then
+    if not handle.finishConnect() then
         return nil -- unsuccessful
     end
     -- make handle

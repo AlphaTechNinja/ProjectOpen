@@ -2,6 +2,11 @@ local classes = require("classes")
 local fs = require("filesystem")
 local Stream = require("Stream")
 local SeekableStream = require("SeekableStream")
+
+---@class IOFile : SeekableStream
+---@field __path string
+---@field __mode "r" | "w"
+---@field __handle file
 local IOFile = classes.create("IOFile",SeekableStream)
 local io = {}
 function IOFile:__tostring()
@@ -53,7 +58,7 @@ function IOFile:seek(whence,pos)
     end
     if self.__handle then
         assert(self.__mode == "r","Attempted to seek a Write-Only stream")
-        return self.__handle:seek(whence,pos)
+        return self.__handle:seek(whence, pos)
     else
         return SeekableStream.seek(self,whence,pos)
     end

@@ -4,11 +4,13 @@ local fs = require("filesystem")
 local classes = require("classes")
 local serialize = require("serialize")
 
----@class PkgInstance
+---@class PkgInstance : classes
 ---@field localpath string
 ---@field userpackages string
 ---@field globalpackages string
----@field loaded table<string, table>
+---@field loaded table<string, table | boolean>
+---@field children table<string, PkgInstance>
+---@field isRoot boolean?
 local PkgInstance = classes.create("PkgInstance")
 
 local function ensureLuaPath(path)
@@ -72,7 +74,7 @@ end
 
 --- makes a localized instance
 ---@param from PkgInstance?
----@param descend string?
+---@param descend string
 ---@return PkgInstance
 function PkgInstance:constructor(from, descend)
     -- added children to improve consistency and loading performance (more modules get cached)
@@ -80,7 +82,8 @@ function PkgInstance:constructor(from, descend)
         return from.children[descend]
     end
     
-    local o = {}
+    local o = setmetatable({}, self)
+    ---@cast o PkgInstance
     if from then
         o.localpath = from.localpath .. (descend and ("/" .. descend) or "")
         o.userpackages = from.userpackages
@@ -91,14 +94,16 @@ function PkgInstance:constructor(from, descend)
     end
     o.loaded = {}
     o.children = {}
-    return setmetatable(o, self)
+    return o
 end
 
 PkgInstance.globalpackages = "/users/kernel/packages"
 PkgInstance.userpackages = ""
 PkgInstance.localpath = "/"
 
-package.globalinstance = PkgInstance:constructor()
+local globalinst = PkgInstance:new()
+---@cast globalinst PkgInstance
+package.globalinstance = globalinst
 package.globalinstance.isRoot = true
 
 function PkgInstance:descend(path)
@@ -210,6 +215,7 @@ function PkgInstance:resolve(path, options)
     if scope == "auto" or scope == "user" then
         local packagepath, basepath, entry = self:resolveUser(path, options)
         if packagepath then
+            ---@diagnostic disable-next-line
             return entry, basepath, true
         end
         if scope == "user" then
@@ -224,6 +230,7 @@ function PkgInstance:resolve(path, options)
             packagespath = gPath
         })
         if gPackagepath then
+            ---@diagnostic disable-next-line
             return gEntry, gBasepath, true
         end
         if scope == "global" then
@@ -236,11 +243,12 @@ end
 
 package.PkgInstance = PkgInstance
 function package.instance(path)
-    return PkgInstance:constructor(package.globalinstance, path)
+    return PkgInstance:new(package.globalinstance, path)
 end
 
 local function createChildInstance(parent, basepath)
-    local child = PkgInstance:constructor(parent)
+    local child = PkgInstance:new(parent)
+    ---@cast child PkgInstance
     child.localpath = basepath or parent.localpath
     return child
 end
@@ -271,6 +279,7 @@ function PkgInstance:import(path, options)
     end
 
     local cacheKey = type(resolved) == "string" and resolved or (tostring(path) .. "::function")
+    ---@cast cacheKey string
     if self.loaded[cacheKey] ~= nil then
         return self.loaded[cacheKey]
     end
@@ -294,6 +303,7 @@ function PkgInstance:import(path, options)
         if not chunk and err then
             error(err, 2)
         end
+        ---@cast chunk function
         result = chunk()
     end
 

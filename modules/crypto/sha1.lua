@@ -1,6 +1,12 @@
 local classes = require("classes")
 local bit32 = require("crypto.bitcompat")
 
+---@class sha1 : classes
+---@field h0 integer
+---@field h1 integer
+---@field h2 integer
+---@field h3 integer
+---@field h4 integer
 local sha1 = classes.create("sha1")
 sha1.__index = sha1
 
